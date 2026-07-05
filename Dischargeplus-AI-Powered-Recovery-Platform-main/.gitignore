@@ -1,0 +1,40 @@
+# Environment & secrets (never commit real keys)
+.env
+.env.local
+.env.*.local
+backend/.env
+frontend/.env
+
+# Secret / credential files
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+secrets.json
+service-account*.json
+**/serviceAccountKey.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+backend/venv/
+venv/
+backend/pip_out.txt
+*.egg-info/
+.pytest_cache/
+
+# Node / frontend build
+node_modules/
+dist/
+frontend/dist/
+*.log
+
+# OS & editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo

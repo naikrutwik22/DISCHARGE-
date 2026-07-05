@@ -1,0 +1,12 @@
+# Dependencies & build
+node_modules
+dist
+
+# Environment & secrets (Vite exposes VITE_* vars to the client)
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*

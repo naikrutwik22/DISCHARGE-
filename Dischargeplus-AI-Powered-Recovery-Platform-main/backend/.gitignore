@@ -1,0 +1,20 @@
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+
+# Secret / credential files
+*.pem
+*.key
+*.p12
+credentials.json
+secrets.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+pip_out.txt
+*.egg-info/
+.pytest_cache/
