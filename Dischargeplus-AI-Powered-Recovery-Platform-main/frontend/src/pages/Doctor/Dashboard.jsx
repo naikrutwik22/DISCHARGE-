@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Search, AlertTriangle, Filter } from 'lucide-react'
+import { Search, AlertTriangle, Filter, Users } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import Sidebar from '../../components/shared/Sidebar'
 import RiskBadge from '../../components/shared/RiskBadge'
@@ -72,32 +72,32 @@ export default function DoctorDashboard() {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 20 }}>
             {/* Patient List */}
-            <div className="glass-card" style={{ overflow: 'hidden' }}>
-              <table className="data-table">
-                <thead>
-                  <tr><th>Patient</th><th>Diagnosis</th><th>Risk</th><th>Last Survey</th><th>Days Post-DC</th></tr>
-                </thead>
-                <tbody>
-                  {loading ? (
-                    <tr>
-                      <td colSpan={5} style={{ textAlign: 'center', padding: 40, color: 'var(--text-secondary)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
-                          <span style={{
-                            width: 18,
-                            height: 18,
-                            border: '2px solid var(--accent)',
-                            borderTopColor: 'transparent',
-                            borderRadius: '50%',
-                            animation: 'spin 1s linear infinite',
-                            display: 'inline-block'
-                          }} />
-                          <span style={{ fontWeight: 500 }}>Loading patients...</span>
-                        </div>
-                      </td>
-                    </tr>
-                  ) : (
-                    <>
-                      {patients.map((p) => {
+            <div className="glass-card" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+              {patients.length > 0 || loading ? (
+                <table className="data-table">
+                  <thead>
+                    <tr><th>Patient</th><th>Diagnosis</th><th>Risk</th><th>Last Survey</th><th>Days Post-DC</th></tr>
+                  </thead>
+                  <tbody>
+                    {loading ? (
+                      <tr>
+                        <td colSpan={5} style={{ textAlign: 'center', padding: 40, color: 'var(--text-secondary)' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                            <span style={{
+                              width: 18,
+                              height: 18,
+                              border: '2px solid var(--accent)',
+                              borderTopColor: 'transparent',
+                              borderRadius: '50%',
+                              animation: 'spin 1s linear infinite',
+                              display: 'inline-block'
+                            }} />
+                            <span style={{ fontWeight: 500 }}>Loading patients...</span>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : (
+                      patients.map((p) => {
                         const daysSince = p.discharge_date ? Math.floor((Date.now() - new Date(p.discharge_date)) / 86400000) : '—'
                         return (
                           <tr key={p.id} style={{ cursor: 'pointer' }} onClick={() => navigate(`/doctor/patient/${p.id}`)}>
@@ -108,12 +108,21 @@ export default function DoctorDashboard() {
                             <td>{daysSince}</td>
                           </tr>
                         )
-                      })}
-                      {patients.length === 0 && <tr><td colSpan={5} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>No patients found</td></tr>}
-                    </>
-                  )}
-                </tbody>
-              </table>
+                      })
+                    )}
+                  </tbody>
+                </table>
+              ) : (
+                <div style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+                  <Users size={48} style={{ opacity: 0.4, marginBottom: 16, color: 'var(--accent)' }} />
+                  <h3 style={{ fontWeight: 600, fontSize: 16, color: 'var(--text-primary)', marginBottom: 6 }}>No Patients Found</h3>
+                  <p style={{ fontSize: 13, maxWidth: 300, margin: '0 auto', lineHeight: 1.5 }}>
+                    {search || riskFilter 
+                      ? "No patients match your search or filter criteria. Try resetting the filters."
+                      : "You do not have any patients assigned to you at the moment."}
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Risk Distribution */}
