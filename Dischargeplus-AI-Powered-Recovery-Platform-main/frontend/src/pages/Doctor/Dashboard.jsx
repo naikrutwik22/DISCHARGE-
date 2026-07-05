@@ -12,21 +12,29 @@ export default function DoctorDashboard() {
   const [search, setSearch] = useState('')
   const [riskFilter, setRiskFilter] = useState('')
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [trigger, setTrigger] = useState(0)
   const navigate = useNavigate()
 
   useEffect(() => {
     const fetch = async () => {
+      setLoading(true)
+      setError(null)
       try {
         const params = {}
         if (riskFilter) params.risk_filter = riskFilter
         if (search) params.search = search
         const res = await api.get('/doctor/patients', { params })
         setPatients(res.data)
-      } catch (e) { console.error(e) }
-      finally { setLoading(false) }
+      } catch (e) {
+        console.error(e)
+        setError(e.response?.data?.detail || 'Failed to fetch patients. Please check your connection and try again.')
+      } finally {
+        setLoading(false)
+      }
     }
     fetch()
-  }, [riskFilter, search])
+  }, [riskFilter, search, trigger])
 
   const highRisk = patients.filter(p => p.risk_level === 'high')
   const riskCounts = {
@@ -42,11 +50,17 @@ export default function DoctorDashboard() {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <div className="page-header">
             <h1 className="page-title">My Patients</h1>
-            <p className="page-subtitle">{loading ? 'Loading assigned patients...' : `${patients.length} assigned patients`}</p>
+            <p className="page-subtitle">
+              {loading 
+                ? 'Loading assigned patients...' 
+                : error 
+                ? 'Error retrieving patient logs' 
+                : `${patients.length} assigned patients`}
+            </p>
           </div>
 
           {/* High Risk Alert */}
-          {!loading && highRisk.length > 0 && (
+          {!loading && !error && highRisk.length > 0 && (
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
               style={{ background: 'rgba(255,71,87,0.1)', border: '1px solid rgba(255,71,87,0.3)', borderRadius: 12, padding: '14px 20px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10 }}>
               <AlertTriangle size={18} color="#FF4757" />
@@ -60,9 +74,9 @@ export default function DoctorDashboard() {
           <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
             <div style={{ position: 'relative', flex: 1, maxWidth: 360 }}>
               <Search size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-              <input className="input-field" style={{ paddingLeft: 40 }} placeholder="Search patients..." value={search} onChange={(e) => setSearch(e.target.value)} disabled={loading} />
+              <input className="input-field" style={{ paddingLeft: 40 }} placeholder="Search patients..." value={search} onChange={(e) => setSearch(e.target.value)} disabled={loading || !!error} />
             </div>
-            <select className="input-field" style={{ width: 180 }} value={riskFilter} onChange={(e) => setRiskFilter(e.target.value)} disabled={loading}>
+            <select className="input-field" style={{ width: 180 }} value={riskFilter} onChange={(e) => setRiskFilter(e.target.value)} disabled={loading || !!error}>
               <option value="">All Risk Levels</option>
               <option value="high">High Risk</option>
               <option value="medium">Medium Risk</option>
@@ -73,43 +87,59 @@ export default function DoctorDashboard() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 20 }}>
             {/* Patient List */}
             <div className="glass-card" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-              {patients.length > 0 || loading ? (
+              {loading ? (
                 <table className="data-table">
                   <thead>
                     <tr><th>Patient</th><th>Diagnosis</th><th>Risk</th><th>Last Survey</th><th>Days Post-DC</th></tr>
                   </thead>
                   <tbody>
-                    {loading ? (
-                      <tr>
-                        <td colSpan={5} style={{ textAlign: 'center', padding: 40, color: 'var(--text-secondary)' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
-                            <span style={{
-                              width: 18,
-                              height: 18,
-                              border: '2px solid var(--accent)',
-                              borderTopColor: 'transparent',
-                              borderRadius: '50%',
-                              animation: 'spin 1s linear infinite',
-                              display: 'inline-block'
-                            }} />
-                            <span style={{ fontWeight: 500 }}>Loading patients...</span>
-                          </div>
-                        </td>
-                      </tr>
-                    ) : (
-                      patients.map((p) => {
-                        const daysSince = p.discharge_date ? Math.floor((Date.now() - new Date(p.discharge_date)) / 86400000) : '—'
-                        return (
-                          <tr key={p.id} style={{ cursor: 'pointer' }} onClick={() => navigate(`/doctor/patient/${p.id}`)}>
-                            <td style={{ fontWeight: 500 }}>{p.full_name}</td>
-                            <td style={{ color: 'var(--text-secondary)' }}>{p.diagnosis || '—'}</td>
-                            <td><RiskBadge level={p.risk_level || 'low'} size="sm" /></td>
-                            <td style={{ fontSize: 12, color: 'var(--text-muted)' }}>{p.last_survey_date ? new Date(p.last_survey_date).toLocaleDateString() : 'Never'}</td>
-                            <td>{daysSince}</td>
-                          </tr>
-                        )
-                      })
-                    )}
+                    <tr>
+                      <td colSpan={5} style={{ textAlign: 'center', padding: 40, color: 'var(--text-secondary)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                          <span style={{
+                            width: 18,
+                            height: 18,
+                            border: '2px solid var(--accent)',
+                            borderTopColor: 'transparent',
+                            borderRadius: '50%',
+                            animation: 'spin 1s linear infinite',
+                            display: 'inline-block'
+                          }} />
+                          <span style={{ fontWeight: 500 }}>Loading patients...</span>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              ) : error ? (
+                <div style={{ padding: '60px 20px', textAlign: 'center', color: '#FF4757', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+                  <AlertTriangle size={48} style={{ opacity: 0.8, marginBottom: 16 }} />
+                  <h3 style={{ fontWeight: 600, fontSize: 16, color: 'var(--text-primary)', marginBottom: 6 }}>Connection Error</h3>
+                  <p style={{ fontSize: 13, maxWidth: 320, margin: '0 auto 16px', lineHeight: 1.5, color: 'var(--text-secondary)' }}>
+                    {error}
+                  </p>
+                  <button className="btn-secondary" style={{ padding: '8px 20px', fontSize: 13 }} onClick={() => setTrigger(t => t + 1)}>
+                    Retry Connection
+                  </button>
+                </div>
+              ) : patients.length > 0 ? (
+                <table className="data-table">
+                  <thead>
+                    <tr><th>Patient</th><th>Diagnosis</th><th>Risk</th><th>Last Survey</th><th>Days Post-DC</th></tr>
+                  </thead>
+                  <tbody>
+                    {patients.map((p) => {
+                      const daysSince = p.discharge_date ? Math.floor((Date.now() - new Date(p.discharge_date)) / 86400000) : '—'
+                      return (
+                        <tr key={p.id} style={{ cursor: 'pointer' }} onClick={() => navigate(`/doctor/patient/${p.id}`)}>
+                          <td style={{ fontWeight: 500 }}>{p.full_name}</td>
+                          <td style={{ color: 'var(--text-secondary)' }}>{p.diagnosis || '—'}</td>
+                          <td><RiskBadge level={p.risk_level || 'low'} size="sm" /></td>
+                          <td style={{ fontSize: 12, color: 'var(--text-muted)' }}>{p.last_survey_date ? new Date(p.last_survey_date).toLocaleDateString() : 'Never'}</td>
+                          <td>{daysSince}</td>
+                        </tr>
+                      )
+                    })}
                   </tbody>
                 </table>
               ) : (
@@ -131,6 +161,10 @@ export default function DoctorDashboard() {
               {loading ? (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 220, color: 'var(--text-muted)', fontSize: 13 }}>
                   Loading distribution...
+                </div>
+              ) : error ? (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 220, color: '#FF4757', fontSize: 13, fontWeight: 500 }}>
+                  Data Unavailable
                 </div>
               ) : (
                 <RiskPie data={[
