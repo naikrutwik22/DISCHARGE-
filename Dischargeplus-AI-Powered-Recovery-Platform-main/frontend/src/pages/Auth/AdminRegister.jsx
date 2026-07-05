@@ -34,9 +34,46 @@ export default function AdminRegister() {
 
   const set = (field) => (e) => setForm({ ...form, [field]: e.target.value })
 
+  const validateForm = () => {
+    if (!form.full_name.trim()) {
+      setError('Full Name is required')
+      return false
+    }
+    if (form.full_name.trim().length < 2) {
+      setError('Full Name must be at least 2 characters')
+      return false
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(form.email)) {
+      setError('Please enter a valid email address')
+      return false
+    }
+    if (form.password.length < 8) {
+      setError('Password must be at least 8 characters long')
+      return false
+    }
+    if (!form.hospital_name.trim()) {
+      setError('Hospital Name is required')
+      return false
+    }
+    if (form.hospital_name.trim().length < 3) {
+      setError('Hospital Name must be at least 3 characters')
+      return false
+    }
+    if (form.hospital_phone) {
+      const phoneRegex = /^\+?[0-9\s\-()]{10,20}$/
+      if (!phoneRegex.test(form.hospital_phone)) {
+        setError('Please enter a valid hospital phone number (min 10 digits)')
+        return false
+      }
+    }
+    return true
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
+    if (!validateForm()) return
     setLoading(true)
     try {
       const payload = { ...form }
