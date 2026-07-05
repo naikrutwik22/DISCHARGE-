@@ -46,44 +46,50 @@ export default function AdminLogin() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
+            role="alert"
+            aria-live="assertive"
             style={{
               background: 'rgba(255,71,87,0.1)', border: '1px solid rgba(255,71,87,0.3)',
               borderRadius: 10, padding: '10px 14px', marginBottom: 20,
               display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#FF4757',
             }}
           >
-            <AlertCircle size={16} /> {error}
+            <AlertCircle size={16} aria-hidden="true" /> {error}
           </motion.div>
         )}
 
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: 20 }}>
-            <label className="input-label">Email</label>
+            <label className="input-label" htmlFor="admin-email">Email</label>
             <div style={{ position: 'relative' }}>
-              <Mail size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+              <Mail size={16} aria-hidden="true" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
               <input
                 type="email"
+                id="admin-email"
                 className="input-field"
                 style={{ paddingLeft: 40 }}
                 placeholder="admin@hospital.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
                 required
               />
             </div>
           </div>
 
           <div style={{ marginBottom: 28 }}>
-            <label className="input-label">Password</label>
+            <label className="input-label" htmlFor="admin-password">Password</label>
             <div style={{ position: 'relative' }}>
-              <Lock size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+              <Lock size={16} aria-hidden="true" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
               <input
                 type="password"
+                id="admin-password"
                 className="input-field"
                 style={{ paddingLeft: 40 }}
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
                 required
               />
             </div>
