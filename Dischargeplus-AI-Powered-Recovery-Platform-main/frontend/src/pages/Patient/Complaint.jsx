@@ -164,10 +164,18 @@ export default function PatientComplaint() {
                     />
                   </div>
                   <div style={{ marginBottom: 16 }}>
-                    <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 8 }}>DESCRIPTION</label>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                      <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>DESCRIPTION</label>
+                      <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{description.length} / 500</span>
+                    </div>
                     <textarea 
-                      required className="input-field" rows={4} placeholder="Detailed explanation..."
-                      value={description} onChange={e => setDescription(e.target.value)}
+                      required 
+                      className="input-field" 
+                      rows={4} 
+                      placeholder="Detailed explanation..."
+                      maxLength={500}
+                      value={description} 
+                      onChange={e => setDescription(e.target.value)}
                     />
                   </div>
                   <div style={{ marginBottom: 24 }}>
