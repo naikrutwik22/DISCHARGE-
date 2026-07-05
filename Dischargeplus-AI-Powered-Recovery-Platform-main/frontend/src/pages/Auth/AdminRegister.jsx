@@ -95,6 +95,7 @@ export default function AdminRegister() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (loading) return
     setError('')
     if (!validateForm()) return
     setLoading(true)
