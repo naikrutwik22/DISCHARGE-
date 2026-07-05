@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Building2, Mail, Lock, User, Phone, MapPin, Activity, AlertCircle } from 'lucide-react'
+import { Building2, Mail, Lock, User, Phone, MapPin, Activity, AlertCircle, Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 
-const Field = ({ label, icon: Icon, type = 'text', placeholder, required = true, value, onChange }) => (
+const Field = ({ label, icon: Icon, type = 'text', placeholder, required = true, value, onChange, toggleShowHide, showToggle, isHidden }) => (
   <div style={{ marginBottom: 16 }}>
     <label className="input-label">{label}</label>
     <div style={{ position: 'relative' }}>
@@ -12,12 +12,34 @@ const Field = ({ label, icon: Icon, type = 'text', placeholder, required = true,
       <input
         type={type}
         className="input-field"
-        style={{ paddingLeft: 40 }}
+        style={{ paddingLeft: 40, paddingRight: showToggle ? 40 : 12 }}
         placeholder={placeholder}
         value={value}
         onChange={onChange}
         required={required}
       />
+      {showToggle && (
+        <button
+          type="button"
+          onClick={toggleShowHide}
+          style={{
+            position: 'absolute',
+            right: 12,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            color: 'var(--text-muted)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 0
+          }}
+        >
+          {isHidden ? <Eye size={16} /> : <EyeOff size={16} />}
+        </button>
+      )}
     </div>
   </div>
 )
@@ -30,6 +52,7 @@ export default function AdminRegister() {
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const { adminRegister } = useAuth()
 
   const set = (field) => (e) => setForm({ ...form, [field]: e.target.value })
@@ -125,7 +148,17 @@ export default function AdminRegister() {
           </p>
           <Field label="Full Name" icon={User} value={form.full_name} onChange={set('full_name')} placeholder="John Doe" />
           <Field label="Email" icon={Mail} type="email" value={form.email} onChange={set('email')} placeholder="admin@hospital.com" />
-          <Field label="Password" icon={Lock} type="password" value={form.password} onChange={set('password')} placeholder="Min 8 characters" />
+          <Field
+            label="Password"
+            icon={Lock}
+            type={showPassword ? 'text' : 'password'}
+            value={form.password}
+            onChange={set('password')}
+            placeholder="Min 8 characters"
+            showToggle={true}
+            isHidden={!showPassword}
+            toggleShowHide={() => setShowPassword(!showPassword)}
+          />
 
           <div style={{ height: 1, background: 'var(--border)', margin: '24px 0' }} />
 
